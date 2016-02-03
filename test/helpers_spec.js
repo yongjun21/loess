@@ -40,8 +40,8 @@ describe('function normalize', function () {
 
 describe('function transpose', function () {
   const caseOne = {
-    test: [-100, 1, 2, 3, 4, 5, 6, 7, 8, 109],
-    expect: [-40.825, 0.408, 0.816, 1.225, 1.633, 2.041, 2.449, 2.858, 3.266, 44.499]
+    test: [109, 8, 7, 6, 5, 4, 3, 2, 1, -100],
+    expect: [44.499, 3.266, 2.858, 2.449, 2.041, 1.633, 1.225, 0.816, 0.408, -40.825]
   }
 
   it('should return transposed matrix', function () {

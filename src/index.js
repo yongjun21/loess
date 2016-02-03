@@ -1,7 +1,7 @@
 import math from 'mathjs'
 import {
-  validateIsArray, validateIsNumber,
-  defaultOptions, normalize, transpose,
+  validateIsArray, validateIsNumber, sampleData,
+  defaultOptions, weightFunc, normalize, transpose,
   polynomialExpansion, distMatrix, weightMatrix, weightedLeastSquare} from './helpers'
 
 export default class Loess {
@@ -18,7 +18,7 @@ export default class Loess {
     if (predictor1.length !== this.n) throw new Error('response and predictors have different length')
 
     if (typeof options !== 'object') throw new Error('options object not provided')
-    Object.assign(options, defaultOptions) // set up default options
+    options = Object.assign({}, defaultOptions, options) // set up default options
 
     if (typeof options.degree === 'string') {
       options.degree = ['constant', 'linear', 'quadratic'].indexOf(options.degree)
@@ -57,8 +57,6 @@ export default class Loess {
     const normalized = this.normalization
       ? this.X.map((x, idx) => this.normalization[idx](x)) : this.X
     this.transposedX = transpose(normalized)
-
-    this.fitted = this.predict()
   }
 
   predict (newX = null) {
@@ -75,18 +73,26 @@ export default class Loess {
       if (x.length !== n) throw new Error('columns have different length')
     })
 
+    const expandedX = polynomialExpansion(newX, this.options.degree)
     const normalized = this.normalization ? newX.map((x, idx) => this.normalization[idx](x)) : newX
     const weightM = weightMatrix(distMatrix(transpose(normalized), this.transposedX), this.options.span, newX.length)
 
+    let newY
     function iterate (wt) {
-      return transpose(newX).map((point, idx) => {
+      newY = transpose(expandedX).map((point, idx) => {
         const fit = weightedLeastSquare(this.expandedX, this.Y, math.dotMultiply(wt[idx], weightM[idx]))
-        wt[idx] = fit.residue
+        const median = math.median(math.abs(fit.residue))
+        wt[idx] = fit.residue.map(residue => weightFunc(residue, 6 * median, 2))
         return math.multiply(point, fit.beta)
       })
     }
 
     const robustWeights = Array(n).fill(Array(this.n).fill(1))
-    for (let iter = 0; iter < this.options.iteration; iter++) iterate(robustWeights)
+    for (let iter = 0; iter < this.options.iteration; iter++) iterate.bind(this)(robustWeights)
+    return newY
   }
 }
+
+const fit = new Loess(sampleData.NOx, sampleData.E)
+
+console.log(fit.predict())
