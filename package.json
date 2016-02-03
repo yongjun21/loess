@@ -22,6 +22,7 @@
     "standard": "^5.4.1"
   },
   "dependencies": {
+    "babel-polyfill": "^6.3.14",
     "mathjs": "^2.6.0"
   }
 }
