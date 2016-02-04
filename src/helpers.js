@@ -73,22 +73,6 @@ export function weightedLeastSquare (predictors, response, weights) {
   }
 }
 
-export function validateIsArray (target, msg) {
-  if (!Array.isArray(target)) throw new Error(msg)
-}
-
-export function validateIsNumber (target, msg) {
-  if (typeof target !== 'number') throw new Error(msg)
-}
-
-export const defaultOptions = {
-  span: 0.75,
-  degree: 2,
-  normalize: true,
-  robust: false,
-  iteration: 4
-}
-
 export const sampleData = {
   NOx: [
     1.561, 1.990, 2.118, 3.834, 4.602,
