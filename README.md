@@ -1,6 +1,8 @@
 # loess
-JavaScript implementation of the Locally-Weighted Regression C package by Cleveland, Grosse and Shyu (1992)
 
+JavaScript implementation of the Locally-Weighted Regression package originally written in C by Cleveland, Grosse and Shyu (1992)
+
+## Getting started
 
 First install the package:
 ```
@@ -14,46 +16,96 @@ var data = require('./myData.json')
 
 Instantiate a LOESS model with the data:
 ```javascript
-var LOESS = require('loess')
-var model = new LOESS(data)
+var Loess = require('loess')
+var options = {span: 0.5, band: 0.8, degree: 1}
+var model = new Loess(data, option)
 ```
 
-Fit model by call the **.predict()** method on the model object:
+Fit model by calling the **.predict( )** method on the model object:
 ```javascript
 var fit = model.predict()
-console.log(fit)
-// do something else with fit
+console.log(fit.fitted)
+// do something else with fit.yhat
 ```
 
-To fit model on a new set of points, pass them in **.predict()** as an object with a data property:
+To fit model on a new set of points, pass a data object into **.predict( )**
 ```javascript
-var test = {
-  data: {
-    x1: [1, 2, 3],
-    x2: [4, 5, 6]
+var newPoints = {
+  x1: [1, 2, 3, 4, 5],
+  x2: [6, 7, 8, 9, 10]
+}
+
+var fit = model.predict(newPoints)
+
+var upperLimit = fit.fitted.map((yhat, idx) => yhat + fit.halfwidth[idx])
+var lowerLimit = fit.fitted.map((yhat, idx) => yhat - fit.halfwidth[idx])
+// plot upperLimit and lowerLimit
+```
+
+***
+
+## Documentation
+
+```javascript
+class Loess {
+  constructor (data: object, options: object) {
+    // arguments
+    data /*required*/ = {        
+      y: [number],
+      x: [number],
+      x2: [number]  // optional
+    }
+
+    options /*optional*/ = {
+      span: number, // 0 to inf, default 0.75
+      band: number, // 0 to 1, default 0
+      degree: [0, 1, 2] || ['constant', 'linear', 'quadratic'] // default 2
+      normalize: boolean, // default true if degree > 1, false otherwise
+      robust: boolean, // default false
+      iterations: integer //default 4 if robust = true, 1 otherwise
+    }
+
+    // return a LOESS model object with the following properties
+    this.y = data.y
+    this.x = [data.x, data.x2] // predictor matrix
+    this.n = this.y.length // number of data points
+    this.d = this.x.length // dimension of predictors
+    this.bandwidth = options.span * this.n // number of data points used in local regression
+    this.options = options
+  }
+
+  predict (data: object) {
+    // arguments
+    data /*optional*/ = {        
+      x: [number],
+      x2: [number]
+    } // default this.x
+
+    return {
+      fitted: [number], // fitted values for the specified data points
+      halfwidth: [number] // fitted +- halfwidth is the uncertainty band
+    }
   }
 }
-var fit = model.predict(test)
-console.log(fit)
 ```
 
-You can pass options into your LOESS model:
-```javascript
-var options = {span: 0.5, degree: 1}
-data.options = options
-var model = new LOESS(data)
-// model will be fitted with supplied options
-```
+#### Note:
 
-Options can also be set for **.predict()**:
-```javascript
-var test = {
-  data: {
-    x1: [1, 2, 3],
-    x2: [4, 5, 6]
-  },
-  band: 0.8
-}
-var fit = model.predict(test)
-// fit now includes a property halfwidth
-```
+- **data** should be passed into the constructor function as json with keys **y**, **x** and optionally **x2**. Values being the arrays of response and predictor variables.
+- If no data is supplied to **.predict( )** method, default is to perform fitting on the original data the model is constructed with.
+- **span** refers to the % number of neighboring points used in local regression.
+- **band** specifies how wide the uncertainty band should be. The higher the value, the greater number of points encompassed by the uncertainty band. Setting to 0 will return only **fitted** values.
+- By default LOESS model will perform local fitting using the quadratic function. Overwrite this by setting the **degree** option to "linear" or "constant". Lower degree fitting function computes faster.
+- For multivariate data, **normalize** option defaults to true. This means normalization is applied before performing proximity calculation. Data is transformed by dividing the factors by their 10% trimmed sample standard deviation. Turn off this option if dealing with geographical data.
+- Set **robust** option to true to turn on iterative robust fitting procedure. Applicable for estimates that have non-Gaussian errors. More **iterations** requires longer computation time.
+
+
+## Credits
+
+William S. Cleveland, Susan J. Devlin <br>
+[Locally Weighted Regression: An Approach to Regression Analysis by Local Fitting](http://www.stat.washington.edu/courses/stat527/s13/readings/Cleveland_Delvin_JASA_1988.pdf) <br>
+Journal of the American Statistical Association, Vol. 83, No. 403. (Sep., 1988), pp. 596-610.
+
+William S. Cleveland, Eric Grosse, Ming-Jen Shyu <br>
+Software for Locally-Weighted Regression (18 August 1992) <br>
+Available on [http://www.netlib.org/a/dloess](http://www.netlib.org/a/dloess)

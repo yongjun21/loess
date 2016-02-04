@@ -1,10 +1,11 @@
 {
-  "name": "loess-smooth",
+  "name": "loess",
   "version": "1.0.0",
-  "description": "JavaScript implementation of the Locally-Weighted Regression C package by Cleveland, Grosse and Shyu (1992)",
+  "description": "JavaScript implementation of the Locally-Weighted Regression package originally written in C by Cleveland, Grosse and Shyu (1992)",
   "main": "dist/index.js",
   "scripts": {
-    "prepublish": "rm -rf dist && mkdir dist && babel src --out-file dist/index.js",
+    "build": "rm -rf dist && mkdir dist && babel src --out-file dist/index.js",
+    "prepublish": "npm run build && npm run test",
     "test": "standard && mocha --compilers js:babel-core/register"
   },
   "repository": {
@@ -17,6 +18,15 @@
     "url": "https://github.com/yongjun21/loess-smooth/issues"
   },
   "homepage": "https://github.com/yongjun21/loess-smooth#readme",
+  "keywords": [
+    "statistic",
+    "regression",
+    "smoothing",
+    "fitting",
+    "graph",
+    "plot",
+    "utility"
+  ],
   "dependencies": {
     "gaussian": "^1.0.0",
     "lodash.sortby": "^4.0.2",

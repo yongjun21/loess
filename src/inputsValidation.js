@@ -6,27 +6,28 @@ function validateIsNumber (target, msg) {
   if (typeof target !== 'number') throw new Error(msg)
 }
 
-export function validateModel (obj) {
-  if (!obj) throw new Error('no argument passed in to constructor')
-  let {y, x1, x2 = null, options = {}} = obj
+export function validateModel (data, options) {
+  if (!data) throw new Error('no data passed in to constructor')
+  let {y, x, x2 = null} = data
 
   validateIsArray(y, 'Invalid type: y should be an array')
-  validateIsArray(x1, 'Invalid type: x1 should be an array')
+  validateIsArray(x, 'Invalid type: x should be an array')
 
   y.forEach(v => validateIsNumber(v, 'Invalid type: y should include only numbers'))
-  x1.forEach(v => validateIsNumber(v, 'Invalid type: x1 should include only numbers'))
+  x.forEach(v => validateIsNumber(v, 'Invalid type: x should include only numbers'))
 
-  const x = [x1]
   const n = y.length
-  if (x1.length !== n) throw new Error('y and x1 have different length')
+  if (x.length !== n) throw new Error('y and x have different length')
+  x = [x]
 
   if (!options || typeof options !== 'object') throw new Error('Invalid type: options should be passed in as an object')
   options = Object.assign({
     span: 0.75,
+    band: 0,
     degree: 2,
     normalize: true,
     robust: false,
-    iteration: 4
+    iterations: 4
   }, options)
 
   if (typeof options.degree === 'string') {
@@ -35,6 +36,9 @@ export function validateModel (obj) {
   validateIsNumber(options.span, 'Invalid type: options.span should be a number')
   if (options.span <= 0) throw new Error('options.span should be greater than 0')
 
+  validateIsNumber(options.band, 'Invalid type: options.band should be a number')
+  if (options.band < 0 || options.band >= 0.99) throw new Error('options.band should be between 0 and 1')
+
   validateIsNumber(options.degree, 'Invalid type: options.degree should be an integer')
   if (options.degree - Math.floor(options.degree) > 0) throw new Error('Invalid type: options.degree should be an integer')
   if (options.degree < 0 || options.degree > 2) throw new Error('options.degree should be between 0 and 2')
@@ -42,16 +46,15 @@ export function validateModel (obj) {
   if (typeof options.normalize !== 'boolean') throw new Error('Invalid type: options.normalize should be a boolean')
   if (typeof options.robust !== 'boolean') throw new Error('Invalid type: options.robust should be a boolean')
 
-  validateIsNumber(options.iteration, 'Invalid type: options.degree should be an integer')
-  if (options.iteration - Math.floor(options.iteration) > 0) throw new Error('Invalid type: options.iteration should be an integer')
-  if (options.iteration < 1) throw new Error('options.iteration should be at least 1')
-  if (!options.robust) options.iteration = 1
+  validateIsNumber(options.iterations, 'Invalid type: options.iterations should be an integer')
+  if (options.iterations - Math.floor(options.iterations) > 0) throw new Error('Invalid type: options.iterations should be an integer')
+  if (options.iterations < 1) throw new Error('options.iterations should be at least 1')
+  if (!options.robust) options.iterations = 1
 
   if (x2) {
     validateIsArray(x2, 'Invalid type: x2 should be an array')
     x2.forEach(v => validateIsNumber(v, 'Invalid type: x2 should include only numbers'))
     if (x2.length !== n) throw new Error('y and x2 have different length')
-
     x.push(x2)
   }
 
@@ -63,30 +66,21 @@ export function validateModel (obj) {
   }
 }
 
-export function validatePredict (obj) {
-  obj = obj || {}
-  obj = Object.assign({
-    data: 'original',
-    grid: this.d === 1 ? [50] : [25, 25],
-    band: null
-  }, obj)
+export function validatePredict (data) {
+  // options = Object.assign({
+  //   grid: this.d === 1 ? [50] : [25, 25],
+  // }, options)
 
-  if (obj.data === 'original') {
-    obj.data = {
-      x1: this.x[0],
-      x2: this.x[1]
-    }
-  } else if (!obj.data || typeof obj.data !== 'object') {
-    throw new Error('Invalid type: data should be supplied as an object')
-  }
+  if (!data) data = {x: this.x[0], x2: this.x[1]}
+  if (typeof data !== 'object') throw new Error('Invalid type: data should be supplied as an object')
 
-  let {data: {x1, x2 = null}, band} = obj
+  let {x, x2 = null} = data
 
-  validateIsArray(x1, 'Invalid type: x1 should be an array')
-  x1.forEach(v => validateIsNumber(v, 'Invalid type: x1 should include only numbers'))
+  validateIsArray(x, 'Invalid type: x should be an array')
+  x.forEach(v => validateIsNumber(v, 'Invalid type: x1 should include only numbers'))
 
-  const x_new = [x1]
-  const n = x1.length
+  const x_new = [x]
+  const n = x.length
 
   if (this.d > 1) {
     validateIsArray(x2, 'Invalid type: x1 should be an array')
@@ -96,10 +90,5 @@ export function validatePredict (obj) {
   } else {
     if (x2) throw new Error('extra variable x2')
   }
-
-  if (band) {
-    validateIsNumber(band, 'Invalid type: options.band should be a number')
-    if (band <= 0 || band >= 0.99) throw new Error('options.band should be between 0 and 1')
-  }
-  return {x_new: x_new, n: n, band: band}
+  return {x_new: x_new, n: n}
 }
