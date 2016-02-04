@@ -24,7 +24,6 @@ export function validateModel (obj) {
   options = Object.assign({
     span: 0.75,
     degree: 2,
-    confInterval: 0.9,
     normalize: true,
     robust: false,
     iteration: 4
@@ -39,9 +38,6 @@ export function validateModel (obj) {
   validateIsNumber(options.degree, 'Invalid type: options.degree should be an integer')
   if (options.degree - Math.floor(options.degree) > 0) throw new Error('Invalid type: options.degree should be an integer')
   if (options.degree < 0 || options.degree > 2) throw new Error('options.degree should be between 0 and 2')
-
-  validateIsNumber(options.confInterval, 'Invalid type: options.confInterval should be a number')
-  if (options.confInterval <= 0 || options.confInterval >= 0.99) throw new Error('options.confInterval should be between 0 and 1')
 
   if (typeof options.normalize !== 'boolean') throw new Error('Invalid type: options.normalize should be a boolean')
   if (typeof options.robust !== 'boolean') throw new Error('Invalid type: options.robust should be a boolean')
@@ -72,7 +68,7 @@ export function validatePredict (obj) {
   obj = Object.assign({
     data: 'original',
     grid: this.d === 1 ? [50] : [25, 25],
-    se: false
+    band: null
   }, obj)
 
   if (obj.data === 'original') {
@@ -84,7 +80,7 @@ export function validatePredict (obj) {
     throw new Error('Invalid type: data should be supplied as an object')
   }
 
-  let {data: {x1, x2 = null}, se} = obj
+  let {data: {x1, x2 = null}, band} = obj
 
   validateIsArray(x1, 'Invalid type: x1 should be an array')
   x1.forEach(v => validateIsNumber(v, 'Invalid type: x1 should include only numbers'))
@@ -101,7 +97,9 @@ export function validatePredict (obj) {
     if (x2) throw new Error('extra variable x2')
   }
 
-  if (typeof se !== 'boolean') throw new Error('Invalid type: options.se should be a boolean')
-
-  return {x_new: x_new, n: n, se: se}
+  if (band) {
+    validateIsNumber(band, 'Invalid type: options.band should be a number')
+    if (band <= 0 || band >= 0.99) throw new Error('options.band should be between 0 and 1')
+  }
+  return {x_new: x_new, n: n, band: band}
 }
