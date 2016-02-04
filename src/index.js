@@ -6,7 +6,6 @@ import {
 
 export default class Loess {
   constructor (obj) {
-    if (!obj) throw new Error('no argument passed in to constructor')
     Object.assign(this, validateModel(obj))
 
     if (this.options.normalize) this.normalization = this.x.map(normalize)
@@ -17,29 +16,42 @@ export default class Loess {
     this.transposedX = transpose(normalized)
   }
 
-  predict (...args) {
-    const {newX, n} = validatePredict.bind(this)(args)
+  predict (obj) {
+    const {x_new, n, se} = validatePredict.bind(this)(obj)
 
-    const expandedX = polynomialExpansion(newX, this.options.degree)
-    const normalized = this.normalization ? newX.map((x, idx) => this.normalization[idx](x)) : newX
-    const weightM = weightMatrix(distMatrix(transpose(normalized), this.transposedX), this.options.span, newX.length)
+    const expandedX = polynomialExpansion(x_new, this.options.degree)
+    const normalized = this.normalization ? x_new.map((x, idx) => this.normalization[idx](x)) : x_new
+    const inflate = this.options.span > 1 ? 1 : Math.pow(this.options.span, 1 / this.d)
+    const weightM = weightMatrix(distMatrix(transpose(normalized), this.transposedX), this.bandwidth, inflate)
 
-    let newY
+    let y_hat, error
     function iterate (wt) {
-      newY = transpose(expandedX).map((point, idx) => {
-        const fit = weightedLeastSquare(this.expandedX, this.y, math.dotMultiply(wt[idx], weightM[idx]))
+      y_hat = []
+      error = []
+      transpose(expandedX).forEach((point, idx) => {
+        wt[idx] = math.dotMultiply(wt[idx], weightM[idx])
+        const fit = weightedLeastSquare(this.expandedX, this.y, wt[idx])
+        y_hat.push(math.multiply(point, fit.beta))
+        if (se) {
+          const V1 = math.sum(wt[idx])
+          const V2 = math.multiply(wt[idx], wt[idx])
+          const errorEstimate = Math.sqrt(math.multiply(math.square(fit.residue), wt[idx]) / (V1 - V2 / V1))
+          error.push(errorEstimate)
+        }
         const median = math.median(math.abs(fit.residue))
         wt[idx] = fit.residue.map(residue => weightFunc(residue, 6 * median, 2))
-        return math.multiply(point, fit.beta)
       })
     }
 
-    const robustWeights = Array(n).fill(Array(this.n).fill(1))
+    const robustWeights = Array(n).fill(math.ones(this.n))
     for (let iter = 0; iter < this.options.iteration; iter++) iterate.bind(this)(robustWeights)
-    return newY
+    return {
+      yhat: y_hat,
+      error: error
+    }
   }
 }
 
 const fit = new Loess({y: sampleData.NOx, x1: sampleData.E})
 
-console.log(fit.predict())
+console.log(fit.predict({se: true}))

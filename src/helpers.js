@@ -23,18 +23,20 @@ export function transpose (X) {
 }
 
 export function euclideanDist (orig, dest) {
-  return Math.sqrt(orig.reduce((acc, val, idx) => acc + Math.pow(val - dest[idx], 2), 0))
+  if (orig.length < 2) {
+    return Math.abs(orig[0] - dest[0])
+  } else {
+    return Math.sqrt(orig.reduce((acc, val, idx) => acc + Math.pow(val - dest[idx], 2), 0))
+  }
 }
 
 export function distMatrix (origSet, destSet) {
   return origSet.map(orig => destSet.map(dest => euclideanDist(orig, dest)))
 }
 
-export function weightMatrix (distMat, span, dimension) {
-  const cutoff = span <= 1 ? Math.floor(span * distMat[0].length) : distMat[0].length
+export function weightMatrix (distMat, bandwidth, inflate) {
   return distMat.map(distVect => {
-    let dmax = sort(distVect)[cutoff - 1]
-    if (span > 1) dmax = dmax * Math.pow(span, 1 / dimension)
+    let dmax = sort(distVect)[bandwidth - 1] * inflate
     return distVect.map(d => weightFunc(d, dmax, 3))
   })
 }

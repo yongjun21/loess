@@ -18,7 +18,7 @@ describe('function weightFunc', function () {
   })
 })
 
-describe('function normalize', function () {
+describe('function transpose', function () {
   const caseOne = {
     test: [
       [1, 2, 3, 4, 5],
@@ -33,18 +33,18 @@ describe('function normalize', function () {
     ]
   }
 
-  it('should return array divided by 10% trimmed sample deviation', function () {
+  it('should return transposed matrix', function () {
     expect(transpose(caseOne.test)).to.eql(caseOne.expect)
   })
 })
 
-describe('function transpose', function () {
+describe('function normalize', function () {
   const caseOne = {
     test: [109, 8, 7, 6, 5, 4, 3, 2, 1, -100],
     expect: [44.499, 3.266, 2.858, 2.449, 2.041, 1.633, 1.225, 0.816, 0.408, -40.825]
   }
 
-  it('should return transposed matrix', function () {
+  it('should return array divided by 10% trimmed sample deviation', function () {
     const normalizedArr = normalize(caseOne.test)(caseOne.test)
     expect(math.round(normalizedArr, 3)).to.eql(caseOne.expect)
   })
