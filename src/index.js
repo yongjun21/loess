@@ -63,7 +63,7 @@ export default class Loess {
       const x_sorted = sort(x)
       const x_min = x_sorted[0]
       const x_max = x_sorted[this.n - 1]
-      const width = (x_max - x_min) / (cuts[idx] + 1)
+      const width = (x_max - x_min) / (cuts[idx] - 1)
       x_cuts.push([])
       for (let i = 0; i < cuts[idx]; i++) x_cuts[idx].push(x_min + i * width)
 
