@@ -1,9 +1,10 @@
 import math from 'mathjs'
+import sort from 'lodash.sortby'
 import gaussian from 'gaussian'
-import {validateModel, validatePredict} from './inputsValidation'
+import {validateModel, validatePredict, validateGrid} from './inputsValidation'
 import {weightFunc, normalize, transpose, distMatrix, weightMatrix,
   polynomialExpansion, weightedLeastSquare} from './helpers'
-// import data from '../data/gas.json'
+// import data from '../data/ethanol.json'
 
 export default class Loess {
   constructor (data, options = {}) {
@@ -52,7 +53,39 @@ export default class Loess {
     if (this.options.band) Object.assign(output, {halfwidth: halfwidth})
     return output
   }
+
+  grid (cuts) {
+    validateGrid.bind(this)(cuts)
+
+    const x_new = []
+    const x_cuts = []
+    this.x.forEach((x, idx) => {
+      const x_sorted = sort(x)
+      const x_min = x_sorted[0]
+      const x_max = x_sorted[this.n - 1]
+      const width = (x_max - x_min) / (cuts[idx] + 1)
+      x_cuts.push([])
+      for (let i = 0; i < cuts[idx]; i++) x_cuts[idx].push(x_min + i * width)
+
+      let repeats = 1
+      let copies = 1
+      for (let i = idx - 1; i >= 0; i--) repeats *= cuts[i]
+      for (let i = idx + 1; i < this.d; i++) copies *= cuts[i]
+
+      x_new.push([])
+      for (let i = 0; i < repeats; i++) {
+        x_new[idx] = x_new[idx].concat(x_cuts[idx].reduce((acc, cut) => acc.concat(Array(copies).fill(cut)), []))
+      }
+    })
+
+    const data = {x: x_new[0], x_cut: x_cuts[0]}
+    if (this.d > 1) {
+      data.x2 = x_new[1]
+      data.x_cut2 = x_cuts[1]
+    }
+    return data
+  }
 }
 
-// const fit = new Loess({y: data.NOx, x: data.E}, {band: 0.8})
-// console.log(fit.predict())
+// const fit = new Loess({y: data.NOx, x: data.E, x2: data.C}, {band: 0.8})
+// console.log(fit.grid([10, 10]))

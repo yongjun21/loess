@@ -6,6 +6,10 @@ function validateIsNumber (target, msg) {
   if (typeof target !== 'number') throw new Error(msg)
 }
 
+function validateIsInteger (target, msg) {
+  if (target - Math.floor(target) > 0) throw new Error(msg)
+}
+
 export function validateModel (data, options) {
   if (!data) throw new Error('no data passed in to constructor')
   let {y, x, x2 = null} = data
@@ -40,14 +44,14 @@ export function validateModel (data, options) {
   if (options.band < 0 || options.band >= 0.99) throw new Error('options.band should be between 0 and 1')
 
   validateIsNumber(options.degree, 'Invalid type: options.degree should be an integer')
-  if (options.degree - Math.floor(options.degree) > 0) throw new Error('Invalid type: options.degree should be an integer')
+  validateIsInteger(options.degree, 'Invalid type: options.degree should be an integer')
   if (options.degree < 0 || options.degree > 2) throw new Error('options.degree should be between 0 and 2')
 
   if (typeof options.normalize !== 'boolean') throw new Error('Invalid type: options.normalize should be a boolean')
   if (typeof options.robust !== 'boolean') throw new Error('Invalid type: options.robust should be a boolean')
 
   validateIsNumber(options.iterations, 'Invalid type: options.iterations should be an integer')
-  if (options.iterations - Math.floor(options.iterations) > 0) throw new Error('Invalid type: options.iterations should be an integer')
+  validateIsInteger(options.iterations, 'Invalid type: options.iterations should be an integer')
   if (options.iterations < 1) throw new Error('options.iterations should be at least 1')
   if (!options.robust) options.iterations = 1
 
@@ -83,12 +87,22 @@ export function validatePredict (data) {
   const n = x.length
 
   if (this.d > 1) {
-    validateIsArray(x2, 'Invalid type: x1 should be an array')
-    x2.forEach(v => validateIsNumber(v, 'Invalid type: x1 should include only numbers'))
-    if (x2.length !== n) throw new Error('x1 and x2 have different length')
+    validateIsArray(x2, 'Invalid type: x2 should be an array')
+    x2.forEach(v => validateIsNumber(v, 'Invalid type: x2 should include only numbers'))
+    if (x2.length !== n) throw new Error('x and x2 have different length')
     x_new.push(x2)
   } else {
     if (x2) throw new Error('extra variable x2')
   }
   return {x_new: x_new, n: n}
+}
+
+export function validateGrid (cuts) {
+  validateIsArray(cuts, 'Invalid type: cuts should be an array')
+  cuts.forEach(cut => {
+    validateIsNumber(cut, 'Invalid type: cuts should include only integers')
+    validateIsInteger(cut, 'Invalid type: cuts should include only integers')
+    if (cuts < 1) throw new Error('cuts should include only integers > 2')
+  })
+  if (cuts.length !== this.d) throw new Error('cuts.length should match dimension of predictors')
 }
