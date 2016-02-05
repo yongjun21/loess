@@ -63,10 +63,9 @@ export function validateModel (data, options) {
   }
 
   return {
-    y: y, x: x, n: n,
+    y, x, n, options,
     d: x2 ? 2 : 1,
-    bandwidth: options.span <= 1 ? Math.floor(options.span * n) : n,
-    options: options
+    bandwidth: options.span <= 1 ? Math.floor(options.span * n) : n
   }
 }
 
@@ -94,7 +93,7 @@ export function validatePredict (data) {
   } else {
     if (x2) throw new Error('extra variable x2')
   }
-  return {x_new: x_new, n: n}
+  return {x_new, n}
 }
 
 export function validateGrid (cuts) {

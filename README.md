@@ -51,6 +51,17 @@ fit = model.predict(newData)
 
 ***
 
+## Usage
+
+![screenshot1](./img/screenshot1.png)
+
+![screenshot2](./img/screenshot2.png)
+
+#### Find out more by visiting my demo app: <br>
+[https://loess.daburu.xyz/](https://loess.daburu.xyz/)
+
+***
+
 ## Documentation
 
 ```javascript

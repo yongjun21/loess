@@ -4,7 +4,7 @@ import gaussian from 'gaussian'
 import {validateModel, validatePredict, validateGrid} from './inputsValidation'
 import {weightFunc, normalize, transpose, distMatrix, weightMatrix,
   polynomialExpansion, weightedLeastSquare} from './helpers'
-// import data from '../data/ethanol.json'
+// import data from '../data/gas.json'
 
 export default class Loess {
   constructor (data, options = {}) {
@@ -34,7 +34,7 @@ export default class Loess {
       transpose(expandedX).forEach((point, idx) => {
         wt[idx] = math.dotMultiply(wt[idx], weightM[idx])
         const fit = weightedLeastSquare(this.expandedX, this.y, wt[idx])
-        fitted.push(math.multiply(point, fit.beta))
+        fitted.push(math.squeeze(math.multiply(point, fit.beta)))
         if (this.options.band) {
           const V1 = math.sum(wt[idx])
           const V2 = math.multiply(wt[idx], wt[idx])
@@ -49,8 +49,8 @@ export default class Loess {
     const robustWeights = Array(n).fill(math.ones(this.n))
     for (let iter = 0; iter < this.options.iterations; iter++) iterate.bind(this)(robustWeights)
 
-    const output = {fitted: fitted}
-    if (this.options.band) Object.assign(output, {halfwidth: halfwidth})
+    const output = {fitted}
+    if (this.options.band) Object.assign(output, {halfwidth})
     return output
   }
 
@@ -79,13 +79,10 @@ export default class Loess {
     })
 
     const data = {x: x_new[0], x_cut: x_cuts[0]}
-    if (this.d > 1) {
-      data.x2 = x_new[1]
-      data.x_cut2 = x_cuts[1]
-    }
+    if (this.d > 1) Object.assign(data, {x2: x_new[1], x_cut2: x_cuts[1]})
     return data
   }
 }
 
-// const fit = new Loess({y: data.NOx, x: data.E, x2: data.C}, {band: 0.8})
-// console.log(fit.grid([10, 10]))
+// const fit = new Loess({y: data.NOx, x: data.E}, {span: 0.8, band: 0.8, degree: 'constant'})
+// console.log(fit.predict(fit.grid([30])))

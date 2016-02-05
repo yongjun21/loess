@@ -1,6 +1,6 @@
 {
   "name": "loess",
-  "version": "1.1.1",
+  "version": "1.1.7",
   "description": "JavaScript implementation of the Locally-Weighted Regression package originally written in C by Cleveland, Grosse and Shyu (1992)",
   "main": "dist/index.js",
   "scripts": {

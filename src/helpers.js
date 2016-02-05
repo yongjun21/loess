@@ -66,7 +66,7 @@ export function weightedLeastSquare (predictors, response, weights) {
   const LHS = math.multiply(predictors, weightedX)
   const RHS = math.multiply(predictors, weightedY)
   const beta = math.multiply(math.inv(LHS), RHS)
-  const yhat = math.multiply(beta, predictors)
+  const yhat = math.squeeze(math.multiply(beta, predictors))
   const residue = math.subtract(response, yhat)
   return {
     beta: beta,
