@@ -31,7 +31,7 @@ console.log(fit.fitted)
 To fit model on a new set of points, pass a data object into **.predict( )**
 ```javascript
 var newData = {
-  x1: [1, 2, 3, 4, 5],
+  x: [1, 2, 3, 4, 5],
   x2: [6, 7, 8, 9, 10]
 }
 
