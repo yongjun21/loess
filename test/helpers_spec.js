@@ -3,7 +3,7 @@ import {expect} from 'chai'
 import math from 'mathjs'
 import {
   weightFunc, normalize, transpose,
-  euclideanDist, distMatrix,
+  euclideanDist, distMatrix, weightMatrix,
   polynomialExpansion, weightedLeastSquare
 } from '../src/helpers'
 
@@ -71,6 +71,37 @@ describe('function distMatrix', function () {
   }
   it('should return matrix of Euclidean distance between pairs of points', function () {
     expect(distMatrix(caseOne.coordinates, caseOne.coordinates)).to.eql(caseOne.expect)
+  })
+})
+
+describe('function weightMatrix', function () {
+  const distMat = [
+    [5, 4, 3, 2, 1]
+  ]
+  const caseOne = {
+    bandwidth: 3,
+    inflate: 1,
+    expect: [
+      [0, 0, 0, 0.348, 0.893]
+    ]
+  }
+  const caseTwo = {
+    bandwidth: 5,
+    inflate: 2,
+    expect: [
+      [0.67, 0.82, 0.921, 0.976, 0.997]
+    ]
+  }
+
+  it('span <= 1', function () {
+    const actual = weightMatrix(distMat, caseOne.bandwidth, caseOne.inflate)
+    actual[0] = math.round(actual[0], 3)
+    expect(actual).to.eql(caseOne.expect)
+  })
+  it('span > 1', function () {
+    const actual = weightMatrix(distMat, caseTwo.bandwidth, caseTwo.inflate)
+    actual[0] = math.round(actual[0], 3)
+    expect(actual).to.eql(caseTwo.expect)
   })
 })
 
