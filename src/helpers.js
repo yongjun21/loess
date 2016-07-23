@@ -1,5 +1,6 @@
 import math from 'mathjs'
 import sort from 'lodash.sortby'
+import zip from 'lodash.zip'
 
 export function weightFunc (d, dmax, degree) {
   return d < dmax ? Math.pow(1 - Math.pow(d / dmax, degree), degree) : 0
@@ -34,10 +35,19 @@ export function distMatrix (origSet, destSet) {
   return origSet.map(orig => destSet.map(dest => euclideanDist(orig, dest)))
 }
 
-export function weightMatrix (distMat, bandwidth, inflate) {
+export function weightMatrix (distMat, inputWeights, span, bandWidth) {
+  const inflate = span > 1 ? span : 1
   return distMat.map(distVect => {
-    let dmax = sort(distVect)[bandwidth - 1] * inflate
-    return distVect.map(d => weightFunc(d, dmax, 3))
+    const sorted = sort(zip(distVect, inputWeights), (v) => v[0])
+    const cutoff = math.sum(inputWeights) * span
+    let sumOfWeights = 0
+    let cutoffIndex = sorted.findIndex(v => {
+      sumOfWeights += v[1]
+      return sumOfWeights >= cutoff
+    })
+    cutoffIndex = cutoffIndex > -1 ? cutoffIndex : sorted.length - 1
+    let dmax = bandWidth || (sorted[cutoffIndex][0] * inflate)
+    return math.dotMultiply(distVect.map(d => weightFunc(d, dmax, 3)), inputWeights)
   })
 }
 

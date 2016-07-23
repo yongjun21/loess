@@ -14,7 +14,7 @@ function validateIsInteger (target, msg) {
 export function validateModel (data, options) {
   if (!data) throw new Error('no data passed in to constructor')
   if (typeof data !== 'object') throw new Error('no data passed in to constructor')
-  let {y, x, x2 = null} = data
+  let {y, x, x2, w} = data
 
   validateIsArray(y, 'Invalid type: y should be an array')
   validateIsArray(x, 'Invalid type: x should be an array')
@@ -31,6 +31,14 @@ export function validateModel (data, options) {
     x2.forEach(v => validateIsNumber(v, 'Invalid type: x2 should include only numbers'))
     if (x2.length !== n) throw new Error('y and x2 have different length')
     x.push(x2)
+  }
+
+  if (w) {
+    validateIsArray(w, 'Invalid type: w should be an array')
+    w.forEach(v => validateIsNumber(v, 'Invalid type: w should include only numbers'))
+    if (w.length !== n) throw new Error('y and w have different length')
+  } else {
+    w = Array(n).fill(1)
   }
 
   if (!options || typeof options !== 'object') throw new Error('Invalid type: options should be passed in as an object')
@@ -63,7 +71,7 @@ export function validateModel (data, options) {
   if (!options.robust) options.iterations = 1
 
   return {
-    y, x, n, options,
+    y, x, w, n, options,
     d: x2 ? 2 : 1,
     bandwidth: options.span <= 1 ? Math.floor(options.span * n) : n
   }

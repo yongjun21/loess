@@ -4,7 +4,7 @@ import gaussian from 'gaussian'
 import {validateModel, validatePredict, validateGrid} from './inputsValidation'
 import {weightFunc, normalize, transpose, distMatrix, weightMatrix,
   polynomialExpansion, weightedLeastSquare} from './helpers'
-// import data from '../data/gas.json'
+import data from '../data/gas.json'
 
 export default class Loess {
   constructor (data, options = {}) {
@@ -23,8 +23,9 @@ export default class Loess {
 
     const expandedX = polynomialExpansion(x_new, this.options.degree)
     const normalized = this.normalization ? x_new.map((x, idx) => this.normalization[idx](x)) : x_new
-    const inflate = this.options.span > 1 ? 1 : Math.pow(this.options.span, 1 / this.d)
-    const weightM = weightMatrix(distMatrix(transpose(normalized), this.transposedX), this.bandwidth, inflate)
+    const _span = this.options.span > 1 ? Math.pow(this.options.span, 1 / this.d) : this.options.span
+    const distM = distMatrix(transpose(normalized), this.transposedX)
+    const weightM = weightMatrix(distM, this.w, _span, this.options.kernelWidth)
     const z = this.options.band ? gaussian(0, 1).ppf(1 - (1 - this.options.band) / 2) : 0
 
     let fitted, halfwidth
@@ -84,5 +85,6 @@ export default class Loess {
   }
 }
 
-// const fit = new Loess({y: data.NOx, x: data.E}, {span: 0.8, band: 0.8, degree: 'constant'})
-// console.log(fit.predict(fit.grid([30])))
+const w = data.NOx.map(() => Math.random() * 10)
+const fit = new Loess({y: data.NOx, x: data.E, w}, {span: 0.8, band: 0.8, degree: 'constant'})
+console.log(fit.predict(fit.grid([30])))

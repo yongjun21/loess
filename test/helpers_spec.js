@@ -79,29 +79,42 @@ describe('function weightMatrix', function () {
     [5, 4, 3, 2, 1]
   ]
   const caseOne = {
-    bandwidth: 3,
-    inflate: 1,
+    inputWeights: [1, 1, 1, 1, 1],
+    span: 0.6,
     expect: [
       [0, 0, 0, 0.348, 0.893]
     ]
   }
   const caseTwo = {
-    bandwidth: 5,
-    inflate: 2,
+    inputWeights: [1, 1, 1, 1, 1],
+    span: 2,
     expect: [
       [0.67, 0.82, 0.921, 0.976, 0.997]
     ]
   }
+  const caseThree = {
+    inputWeights: [1, 1, 1, 1, 1],
+    span: 0.6,
+    bandWidth: 2.5,
+    expect: [
+      [0, 0, 0, 0.116, 0.82]
+    ]
+  }
 
   it('span <= 1', function () {
-    const actual = weightMatrix(distMat, caseOne.bandwidth, caseOne.inflate)
+    const actual = weightMatrix(distMat, caseOne.inputWeights, caseOne.span)
     actual[0] = math.round(actual[0], 3)
     expect(actual).to.eql(caseOne.expect)
   })
   it('span > 1', function () {
-    const actual = weightMatrix(distMat, caseTwo.bandwidth, caseTwo.inflate)
+    const actual = weightMatrix(distMat, caseTwo.inputWeights, caseTwo.span)
     actual[0] = math.round(actual[0], 3)
     expect(actual).to.eql(caseTwo.expect)
+  })
+  it('fixed width', function () {
+    const actual = weightMatrix(distMat, caseThree.inputWeights, caseThree.span, caseThree.bandWidth)
+    actual[0] = math.round(actual[0], 3)
+    expect(actual).to.eql(caseThree.expect)
   })
 })
 
