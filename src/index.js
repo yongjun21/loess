@@ -4,7 +4,7 @@ import gaussian from 'gaussian'
 import {validateModel, validatePredict, validateGrid} from './inputsValidation'
 import {weightFunc, normalize, transpose, distMatrix, weightMatrix,
   polynomialExpansion, weightedLeastSquare} from './helpers'
-import data from '../data/gas.json'
+// import data from '../data/gas.json'
 
 export default class Loess {
   constructor (data, options = {}) {
@@ -85,6 +85,6 @@ export default class Loess {
   }
 }
 
-const w = data.NOx.map(() => Math.random() * 10)
-const fit = new Loess({y: data.NOx, x: data.E, w}, {span: 0.8, band: 0.8, degree: 'constant'})
-console.log(fit.predict(fit.grid([30])))
+// const w = data.NOx.map(() => Math.random() * 10)
+// const fit = new Loess({y: data.NOx, x: data.E, w}, {span: 0.8, band: 0.8, degree: 'constant'})
+// console.log(fit.predict(fit.grid([30])))
