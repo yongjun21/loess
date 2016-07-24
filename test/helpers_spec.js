@@ -131,7 +131,7 @@ describe('function weightedLeastSquare', function () {
     expect: {
       beta: math.matrix([13.5, 1]),
       yhat: math.matrix([14.5, 16.5, 18.5, 20.5]),
-      residuals: math.matrix([-0.5, 0.5, 0.5, -0.5])
+      residual: math.matrix([-0.5, 0.5, 0.5, -0.5])
     }
   }
 
@@ -145,8 +145,17 @@ describe('function weightedLeastSquare', function () {
     expect: {
       beta: math.matrix([13.75, 1]),
       yhat: math.matrix([14.75, 16.75, 18.75, 20.75]),
-      residuals: math.matrix([-0.75, 0.25, 0.25, -0.75])
+      residual: math.matrix([-0.75, 0.25, 0.25, -0.75])
     }
+  }
+
+  const caseThree = {
+    x: [
+      [1, 1, 1, 1],
+      [1, 1, 1, 1]
+    ],
+    y: [14, 17, 19, 20],
+    w: [1, 3, 3, 1]
   }
 
   it('should return vector of fitted parameters (w/o weights)', function () {
@@ -155,5 +164,9 @@ describe('function weightedLeastSquare', function () {
 
   it('should return vector of fitted parameters (with weights)', function () {
     expect(weightedLeastSquare(caseTwo.x, caseTwo.y, caseTwo.w)).to.eql(caseTwo.expect)
+  })
+
+  it('should return error object if x is non-invertible', function () {
+    expect(weightedLeastSquare(caseThree.x, caseThree.y, caseThree.w)).to.contain.keys('error')
   })
 })

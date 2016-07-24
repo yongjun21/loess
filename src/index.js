@@ -33,10 +33,16 @@ export default class Loess {
       weights = math.dotMultiply(wt, weightM)
       transpose(expandedX).forEach((point, idx) => {
         const fit = weightedLeastSquare(this.expandedX, this.y, weights[idx])
+        if (fit.error) {
+          const mle = math.multiply(this.y, weights[idx]) / math.sum(weights[idx])
+          fit.beta = Array(this.expandedX.length).fill(0)
+          fit.beta[0] = mle
+          fit.residual = math.subtract(this.y, mle)
+        }
         fitted.push(math.squeeze(math.multiply(point, fit.beta)))
-        residuals.push(fit.residuals)
-        const median = math.median(math.abs(fit.residuals))
-        wt[idx] = fit.residuals.map(residual => weightFunc(residual, 6 * median, 2))
+        residuals.push(fit.residual)
+        const median = math.median(math.abs(fit.residual))
+        wt[idx] = fit.residual.map(r => weightFunc(r, 6 * median, 2))
       })
     }
 

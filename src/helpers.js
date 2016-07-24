@@ -69,14 +69,18 @@ export function polynomialExpansion (factors, degree) {
 }
 
 export function weightedLeastSquare (predictors, response, weights) {
-  const weightedY = math.matrix(math.dotMultiply(weights, response))
-  const weightedX = math.transpose(math.matrix(predictors.map(x => {
-    return math.dotMultiply(weights, x)
-  })))
-  const LHS = math.multiply(predictors, weightedX)
-  const RHS = math.multiply(predictors, weightedY)
-  const beta = math.multiply(math.inv(LHS), RHS)
-  const yhat = math.squeeze(math.multiply(beta, predictors))
-  const residuals = math.subtract(response, yhat)
-  return {beta, yhat, residuals}
+  try {
+    const weightedY = math.matrix(math.dotMultiply(weights, response))
+    const weightedX = math.transpose(math.matrix(predictors.map(x => {
+      return math.dotMultiply(weights, x)
+    })))
+    const LHS = math.multiply(predictors, weightedX)
+    const RHS = math.multiply(predictors, weightedY)
+    const beta = math.multiply(math.inv(LHS), RHS)
+    const yhat = math.squeeze(math.multiply(beta, predictors))
+    const residual = math.subtract(response, yhat)
+    return {beta, yhat, residual}
+  } catch (err) {
+    return {error: err}
+  }
 }
