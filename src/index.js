@@ -23,35 +23,39 @@ export default class Loess {
 
     const expandedX = polynomialExpansion(x_new, this.options.degree)
     const normalized = this.normalization ? x_new.map((x, idx) => this.normalization[idx](x)) : x_new
-    const _span = this.options.span > 1 ? Math.pow(this.options.span, 1 / this.d) : this.options.span
     const distM = distMatrix(transpose(normalized), this.transposedX)
-    const weightM = weightMatrix(distM, this.w, _span, this.options.kernelWidth)
-    const z = this.options.band ? gaussian(0, 1).ppf(1 - (1 - this.options.band) / 2) : 0
+    const weightM = weightMatrix(distM, this.w, this.bandwidth)
 
-    let fitted, halfwidth
+    let fitted, residuals, weights
     function iterate (wt) {
       fitted = []
-      halfwidth = []
+      residuals = []
+      weights = math.dotMultiply(wt, weightM)
       transpose(expandedX).forEach((point, idx) => {
-        wt[idx] = math.dotMultiply(wt[idx], weightM[idx])
-        const fit = weightedLeastSquare(this.expandedX, this.y, wt[idx])
+        const fit = weightedLeastSquare(this.expandedX, this.y, weights[idx])
         fitted.push(math.squeeze(math.multiply(point, fit.beta)))
-        if (this.options.band) {
-          const V1 = math.sum(wt[idx])
-          const V2 = math.multiply(wt[idx], wt[idx])
-          const intervalEstimate = Math.sqrt(math.multiply(math.square(fit.residue), wt[idx]) / (V1 - V2 / V1))
-          halfwidth.push(intervalEstimate * z)
-        }
-        const median = math.median(math.abs(fit.residue))
-        wt[idx] = fit.residue.map(residue => weightFunc(residue, 6 * median, 2))
+        residuals.push(fit.residuals)
+        const median = math.median(math.abs(fit.residuals))
+        wt[idx] = fit.residuals.map(residual => weightFunc(residual, 6 * median, 2))
       })
     }
 
     const robustWeights = Array(n).fill(math.ones(this.n))
     for (let iter = 0; iter < this.options.iterations; iter++) iterate.bind(this)(robustWeights)
 
-    const output = {fitted}
-    if (this.options.band) Object.assign(output, {halfwidth})
+    const output = {fitted, residuals, weights}
+
+    if (this.options.band) {
+      const z = gaussian(0, 1).ppf(1 - (1 - this.options.band) / 2)
+      const halfwidth = weights.map((weight, idx) => {
+        const V1 = math.sum(weight)
+        const V2 = math.multiply(weight, weight)
+        const intervalEstimate = Math.sqrt(math.multiply(math.square(residuals[idx]), weight) / (V1 - V2 / V1))
+        return intervalEstimate * z
+      })
+      Object.assign(output, {halfwidth})
+    }
+
     return output
   }
 
@@ -87,4 +91,4 @@ export default class Loess {
 
 // const w = data.NOx.map(() => Math.random() * 10)
 // const fit = new Loess({y: data.NOx, x: data.E, w}, {span: 0.8, band: 0.8, degree: 'constant'})
-// console.log(fit.predict(fit.grid([30])))
+// console.log(JSON.stringify(fit.predict(fit.grid([30]))))

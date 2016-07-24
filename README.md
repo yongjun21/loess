@@ -71,7 +71,8 @@ class Loess {
     data /*required*/ = {        
       y: [number],
       x: [number],
-      x2: [number]  // optional
+      x2: [number], // optional
+      w: [number]  // optional
     }
 
     options /*optional*/ = {
@@ -118,7 +119,7 @@ class Loess {
 
 #### Note:
 
-- **data** should be passed into the constructor function as json with keys **y**, **x** and optionally **x2**. Values being the arrays of response and predictor variables.
+- **data** should be passed into the constructor function as json with keys **y**, **x** and optionally **x2** and **w**. Values being the arrays of response, predictor variables, and observation weights.
 - If no data is supplied to **.predict( )** method, default is to perform fitting on the original dataset the model is constructed with.
 - **span** refers to the percentage number of neighboring points used in local regression.
 - **band** specifies how wide the uncertainty band should be. The higher the value, the greater number of points encompassed by the uncertainty band. Setting to 0 will return only **fitted** values.

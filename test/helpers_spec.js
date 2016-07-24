@@ -80,41 +80,28 @@ describe('function weightMatrix', function () {
   ]
   const caseOne = {
     inputWeights: [1, 1, 1, 1, 1],
-    span: 0.6,
+    bandwidth: 0.6,
     expect: [
       [0, 0, 0, 0.348, 0.893]
     ]
   }
   const caseTwo = {
     inputWeights: [1, 1, 1, 1, 1],
-    span: 2,
+    bandwidth: 2,
     expect: [
       [0.67, 0.82, 0.921, 0.976, 0.997]
     ]
   }
-  const caseThree = {
-    inputWeights: [1, 1, 1, 1, 1],
-    span: 0.6,
-    bandWidth: 2.5,
-    expect: [
-      [0, 0, 0, 0.116, 0.82]
-    ]
-  }
 
   it('span <= 1', function () {
-    const actual = weightMatrix(distMat, caseOne.inputWeights, caseOne.span)
+    const actual = weightMatrix(distMat, caseOne.inputWeights, caseOne.bandwidth)
     actual[0] = math.round(actual[0], 3)
     expect(actual).to.eql(caseOne.expect)
   })
   it('span > 1', function () {
-    const actual = weightMatrix(distMat, caseTwo.inputWeights, caseTwo.span)
+    const actual = weightMatrix(distMat, caseTwo.inputWeights, caseTwo.bandwidth)
     actual[0] = math.round(actual[0], 3)
     expect(actual).to.eql(caseTwo.expect)
-  })
-  it('fixed width', function () {
-    const actual = weightMatrix(distMat, caseThree.inputWeights, caseThree.span, caseThree.bandWidth)
-    actual[0] = math.round(actual[0], 3)
-    expect(actual).to.eql(caseThree.expect)
   })
 })
 
@@ -144,7 +131,7 @@ describe('function weightedLeastSquare', function () {
     expect: {
       beta: math.matrix([13.5, 1]),
       yhat: math.matrix([14.5, 16.5, 18.5, 20.5]),
-      residue: math.matrix([-0.5, 0.5, 0.5, -0.5])
+      residuals: math.matrix([-0.5, 0.5, 0.5, -0.5])
     }
   }
 
@@ -158,7 +145,7 @@ describe('function weightedLeastSquare', function () {
     expect: {
       beta: math.matrix([13.75, 1]),
       yhat: math.matrix([14.75, 16.75, 18.75, 20.75]),
-      residue: math.matrix([-0.75, 0.25, 0.25, -0.75])
+      residuals: math.matrix([-0.75, 0.25, 0.25, -0.75])
     }
   }
 

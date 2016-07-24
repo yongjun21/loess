@@ -35,18 +35,18 @@ export function distMatrix (origSet, destSet) {
   return origSet.map(orig => destSet.map(dest => euclideanDist(orig, dest)))
 }
 
-export function weightMatrix (distMat, inputWeights, span, bandWidth) {
-  const inflate = span > 1 ? span : 1
+export function weightMatrix (distMat, inputWeights, bandwidth) {
   return distMat.map(distVect => {
     const sorted = sort(zip(distVect, inputWeights), (v) => v[0])
-    const cutoff = math.sum(inputWeights) * span
+    const cutoff = math.sum(inputWeights) * bandwidth
     let sumOfWeights = 0
     let cutoffIndex = sorted.findIndex(v => {
       sumOfWeights += v[1]
       return sumOfWeights >= cutoff
     })
-    cutoffIndex = cutoffIndex > -1 ? cutoffIndex : sorted.length - 1
-    let dmax = bandWidth || (sorted[cutoffIndex][0] * inflate)
+    let dmax = bandwidth > 1
+      ? (sorted[sorted.length - 1][0] * bandwidth)
+      : sorted[cutoffIndex][0]
     return math.dotMultiply(distVect.map(d => weightFunc(d, dmax, 3)), inputWeights)
   })
 }
@@ -77,10 +77,6 @@ export function weightedLeastSquare (predictors, response, weights) {
   const RHS = math.multiply(predictors, weightedY)
   const beta = math.multiply(math.inv(LHS), RHS)
   const yhat = math.squeeze(math.multiply(beta, predictors))
-  const residue = math.subtract(response, yhat)
-  return {
-    beta: beta,
-    yhat: yhat,
-    residue: residue
-  }
+  const residuals = math.subtract(response, yhat)
+  return {beta, yhat, residuals}
 }

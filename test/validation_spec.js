@@ -87,10 +87,11 @@ describe('validation for model constructor', function () {
   it('return correct bandwidth given span', function () {
     const data = {
       y: [1, 2, 3, 4, 5],
-      x: [1, 2, 3, 4, 5]
+      x: [1, 2, 3, 4, 5],
+      x2: [1, 2, 3, 4, 5]
     }
-    expect(validateModel(data, {span: 0.6}).bandwidth).to.equal(3)
-    expect(validateModel(data, {span: 2}).bandwidth).to.equal(5)
+    expect(validateModel(data, {span: 0.6}).bandwidth).to.equal(0.6)
+    expect(validateModel(data, {span: 4}).bandwidth).to.equal(2)
   })
 })
 

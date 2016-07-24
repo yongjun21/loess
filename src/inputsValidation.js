@@ -70,11 +70,10 @@ export function validateModel (data, options) {
   if (options.iterations < 1) throw new Error('options.iterations should be at least 1')
   if (!options.robust) options.iterations = 1
 
-  return {
-    y, x, w, n, options,
-    d: x2 ? 2 : 1,
-    bandwidth: options.span <= 1 ? Math.floor(options.span * n) : n
-  }
+  const d = x2 ? 2 : 1
+  const bandwidth = options.span > 1 ? Math.pow(options.span, 1 / d) : options.span
+
+  return {y, x, w, n, d, options, bandwidth}
 }
 
 export function validatePredict (data) {
