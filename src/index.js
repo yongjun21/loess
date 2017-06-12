@@ -26,21 +26,22 @@ export default class Loess {
     const distM = distMatrix(transpose(normalized), this.transposedX)
     const weightM = weightMatrix(distM, this.w, this.bandwidth)
 
-    let fitted, residuals, weights
+    let fitted, residuals, weights, betas
     function iterate (wt) {
       fitted = []
       residuals = []
+      betas = []
       weights = math.dotMultiply(wt, weightM)
       transpose(expandedX).forEach((point, idx) => {
         const fit = weightedLeastSquare(this.expandedX, this.y, weights[idx])
         if (fit.error) {
           const mle = math.multiply(this.y, weights[idx]) / math.sum(weights[idx])
-          fit.beta = Array(this.expandedX.length).fill(0)
-          fit.beta[0] = mle
+          fit.beta = math.zeros(this.expandedX.length).set([0], mle)
           fit.residual = math.subtract(this.y, mle)
         }
         fitted.push(math.squeeze(math.multiply(point, fit.beta)))
         residuals.push(fit.residual)
+        betas.push(fit.beta.toArray())
         const median = math.median(math.abs(fit.residual))
         wt[idx] = fit.residual.map(r => weightFunc(r, 6 * median, 2))
       })
@@ -49,7 +50,7 @@ export default class Loess {
     const robustWeights = Array(n).fill(math.ones(this.n))
     for (let iter = 0; iter < this.options.iterations; iter++) iterate.bind(this)(robustWeights)
 
-    const output = {fitted, residuals, weights}
+    const output = {fitted, betas, weights}
 
     if (this.options.band) {
       const z = gaussian(0, 1).ppf(1 - (1 - this.options.band) / 2)
@@ -96,5 +97,5 @@ export default class Loess {
 }
 
 // const w = data.NOx.map(() => Math.random() * 10)
-// const fit = new Loess({y: data.NOx, x: data.E, w}, {span: 0.8, band: 0.8, degree: 'constant'})
+// const fit = new Loess({y: data.NOx, x: data.E, w}, {span: 0.8, band: 0.8, degree: 'quadratic'})
 // console.log(JSON.stringify(fit.predict(fit.grid([30]))))
