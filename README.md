@@ -18,7 +18,7 @@ Instantiate a LOESS model with the data:
 ```javascript
 var Loess = require('loess')
 var options = {span: 0.5, band: 0.8, degree: 1}
-var model = new Loess(data, option)
+var model = new Loess(data, options)
 ```
 
 Fit model by calling the **.predict( )** method on the model object:
