@@ -35,7 +35,8 @@ export default class Loess {
       transpose(expandedX).forEach((point, idx) => {
         const fit = weightedLeastSquare(this.expandedX, this.y, weights[idx])
         if (fit.error) {
-          const mle = math.multiply(this.y, weights[idx]) / math.sum(weights[idx])
+          const sumWeights = math.sum(weights[idx])
+          const mle = sumWeights === 0 ? 0 : math.multiply(this.y, weights[idx]) / sumWeights
           fit.beta = math.zeros(this.expandedX.length).set([0], mle)
           fit.residual = math.subtract(this.y, mle)
         }
