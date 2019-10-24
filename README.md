@@ -58,7 +58,7 @@ fit = model.predict(newData)
 ![screenshot2](./img/screenshot2.png)
 
 #### Find out more by visiting my demo app: <br>
-[https://loess.daburu.xyz/](https://loess.daburu.xyz/)
+[https://loess.netlify.com/](https://loess.netlify.com/)
 
 ***
 
