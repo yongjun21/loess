@@ -44,9 +44,19 @@ describe('function normalize', function () {
     expect: [44.499, 3.266, 2.858, 2.449, 2.041, 1.633, 1.225, 0.816, 0.408, -40.825]
   }
 
+  const caseTwo = {
+    test: [109, 8, 7],
+    expect: [109, 8, 7]
+  }
+
   it('should return array divided by 10% trimmed sample deviation', function () {
     const normalizedArr = normalize(caseOne.test)(caseOne.test)
     expect(math.round(normalizedArr, 3)).to.eql(caseOne.expect)
+  })
+
+  it('should return same array if sample count is too small (lt 4)', function () {
+    const normalizedArr = normalize(caseTwo.test)(caseTwo.test)
+    expect(normalizedArr).to.eql(caseTwo.expect)
   })
 })
 
