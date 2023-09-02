@@ -1,4 +1,4 @@
-import math from 'mathjs'
+import {std, sum, subtract, dotMultiply, matrix, transpose as mathTranspose, inv, multiply, squeeze} from 'mathjs'
 import sort from 'lodash.sortby'
 import zip from 'lodash.zip'
 
@@ -9,7 +9,7 @@ export function weightFunc (d, dmax, degree) {
 export function normalize (referenceArr) {
   const cutoff = Math.ceil(0.1 * referenceArr.length)
   const trimmed_arr = sort(referenceArr).slice(cutoff, referenceArr.length - cutoff)
-  const sd = math.std(trimmed_arr)
+  const sd = std(trimmed_arr)
   return function (outputArr) {
     return outputArr.map(val => val / sd)
   }
@@ -38,7 +38,7 @@ export function distMatrix (origSet, destSet) {
 export function weightMatrix (distMat, inputWeights, bandwidth) {
   return distMat.map(distVect => {
     const sorted = sort(zip(distVect, inputWeights), (v) => v[0])
-    const cutoff = math.sum(inputWeights) * bandwidth
+    const cutoff = sum(inputWeights) * bandwidth
     let sumOfWeights = 0
     let cutoffIndex = sorted.findIndex(v => {
       sumOfWeights += v[1]
@@ -47,7 +47,7 @@ export function weightMatrix (distMat, inputWeights, bandwidth) {
     let dmax = bandwidth > 1
       ? (sorted[sorted.length - 1][0] * bandwidth)
       : sorted[cutoffIndex][0]
-    return math.dotMultiply(distVect.map(d => weightFunc(d, dmax, 3)), inputWeights)
+    return dotMultiply(distVect.map(d => weightFunc(d, dmax, 3)), inputWeights)
   })
 }
 
@@ -58,7 +58,7 @@ export function polynomialExpansion (factors, degree) {
   function crossMultiply (accumulator, pointer, n) {
     if (n > 1) {
       for (let i = pointer; i < factors.length; i++) {
-        crossMultiply(math.dotMultiply(accumulator, factors[i]), i, n - 1)
+        crossMultiply(dotMultiply(accumulator, factors[i]), i, n - 1)
       }
     } else {
       expandedSet.push(accumulator)
@@ -70,15 +70,15 @@ export function polynomialExpansion (factors, degree) {
 
 export function weightedLeastSquare (predictors, response, weights) {
   try {
-    const weightedY = math.matrix(math.dotMultiply(weights, response))
-    const weightedX = math.transpose(math.matrix(predictors.map(x => {
-      return math.dotMultiply(weights, x)
+    const weightedY = matrix(dotMultiply(weights, response))
+    const weightedX = mathTranspose(matrix(predictors.map(x => {
+      return dotMultiply(weights, x)
     })))
-    const LHS = math.multiply(predictors, weightedX)
-    const RHS = math.multiply(predictors, weightedY)
-    const beta = math.multiply(math.inv(LHS), RHS)
-    const yhat = math.squeeze(math.multiply(beta, predictors))
-    const residual = math.subtract(response, yhat)
+    const LHS = multiply(predictors, weightedX)
+    const RHS = multiply(predictors, weightedY)
+    const beta = multiply(inv(LHS), RHS)
+    const yhat = squeeze(multiply(beta, predictors))
+    const residual = subtract(response, yhat)
     return {beta, yhat, residual}
   } catch (err) {
     return {error: err}

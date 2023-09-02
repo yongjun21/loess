@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 import {expect} from 'chai'
-import math from 'mathjs'
+import { matrix, round } from 'mathjs'
 import {
   weightFunc, normalize, transpose,
   euclideanDist, distMatrix, weightMatrix,
@@ -46,13 +46,13 @@ describe('function normalize', function () {
 
   it('should return array divided by 10% trimmed sample deviation', function () {
     const normalizedArr = normalize(caseOne.test)(caseOne.test)
-    expect(math.round(normalizedArr, 3)).to.eql(caseOne.expect)
+    expect(round(normalizedArr, 3)).to.eql(caseOne.expect)
   })
 })
 
 describe('function euclideanDist', function () {
   it('should return Euclidean distance between two vectors', function () {
-    expect(math.round(euclideanDist([1, 2, 3], [4, 5, 6]), 3)).to.equal(5.196)
+    expect(round(euclideanDist([1, 2, 3], [4, 5, 6]), 3)).to.equal(5.196)
   })
 })
 
@@ -95,12 +95,12 @@ describe('function weightMatrix', function () {
 
   it('span <= 1', function () {
     const actual = weightMatrix(distMat, caseOne.inputWeights, caseOne.bandwidth)
-    actual[0] = math.round(actual[0], 3)
+    actual[0] = round(actual[0], 3)
     expect(actual).to.eql(caseOne.expect)
   })
   it('span > 1', function () {
     const actual = weightMatrix(distMat, caseTwo.inputWeights, caseTwo.bandwidth)
-    actual[0] = math.round(actual[0], 3)
+    actual[0] = round(actual[0], 3)
     expect(actual).to.eql(caseTwo.expect)
   })
 })
@@ -129,9 +129,9 @@ describe('function weightedLeastSquare', function () {
     y: [14, 17, 19, 20],
     w: [1, 1, 1, 1],
     expect: {
-      beta: math.matrix([13.5, 1]),
-      yhat: math.matrix([14.5, 16.5, 18.5, 20.5]),
-      residual: math.matrix([-0.5, 0.5, 0.5, -0.5])
+      beta: matrix([13.5, 1]),
+      yhat: matrix([14.5, 16.5, 18.5, 20.5]),
+      residual: matrix([-0.5, 0.5, 0.5, -0.5])
     }
   }
 
@@ -143,9 +143,9 @@ describe('function weightedLeastSquare', function () {
     y: [14, 17, 19, 20],
     w: [1, 3, 3, 1],
     expect: {
-      beta: math.matrix([13.75, 1]),
-      yhat: math.matrix([14.75, 16.75, 18.75, 20.75]),
-      residual: math.matrix([-0.75, 0.25, 0.25, -0.75])
+      beta: matrix([13.75, 1]),
+      yhat: matrix([14.75, 16.75, 18.75, 20.75]),
+      residual: matrix([-0.75, 0.25, 0.25, -0.75])
     }
   }
 
