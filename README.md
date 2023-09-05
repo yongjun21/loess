@@ -5,51 +5,57 @@ JavaScript implementation of the Locally-Weighted Regression package originally 
 ## Getting started
 
 First install the package:
+
 ```
 npm install loess --save
 ```
 
 Load in your data:
+
 ```javascript
-var data = require('./myData.json')
+var data = require("./myData.json");
 ```
 
 Instantiate a LOESS model with the data:
+
 ```javascript
-var Loess = require('loess')
-var options = {span: 0.5, band: 0.8, degree: 1}
-var model = new Loess(data, options)
+var Loess = require("loess");
+var options = { span: 0.5, band: 0.8, degree: 1 };
+var model = new Loess(data, options);
 ```
 
 Fit model by calling the **.predict( )** method on the model object:
+
 ```javascript
-var fit = model.predict()
-console.log(fit.fitted)
+var fit = model.predict();
+console.log(fit.fitted);
 // do something else with fit.fitted
 ```
 
 To fit model on a new set of points, pass a data object into **.predict( )**
+
 ```javascript
 var newData = {
   x: [1, 2, 3, 4, 5],
-  x2: [6, 7, 8, 9, 10]
-}
+  x2: [6, 7, 8, 9, 10],
+};
 
-fit = model.predict(newData)
+fit = model.predict(newData);
 
-var upperLimit = fit.fitted.map((yhat, idx) => yhat + fit.halfwidth[idx])
-var lowerLimit = fit.fitted.map((yhat, idx) => yhat - fit.halfwidth[idx])
+var upperLimit = fit.fitted.map((yhat, idx) => yhat + fit.halfwidth[idx]);
+var lowerLimit = fit.fitted.map((yhat, idx) => yhat - fit.halfwidth[idx]);
 // plot upperLimit and lowerLimit
 ```
 
 Alternatively, use **.grid( )** method to generate a grid of equally spaced points:
-```javascript
-newData = model.grid([20, 20])
 
-fit = model.predict(newData)
+```javascript
+newData = model.grid([20, 20]);
+
+fit = model.predict(newData);
 ```
 
-***
+---
 
 ## Usage
 
@@ -58,9 +64,10 @@ fit = model.predict(newData)
 ![screenshot2](./img/screenshot2.png)
 
 #### Find out more by visiting my demo app: <br>
+
 [https://loess.netlify.com/](https://loess.netlify.com/)
 
-***
+---
 
 ## Documentation
 
@@ -68,7 +75,7 @@ fit = model.predict(newData)
 class Loess {
   constructor (data: object, options: object) {
     // arguments
-    data /*required*/ = {        
+    data /*required*/ = {
       y: [number],
       x: [number],
       x2: [number], // optional
@@ -95,7 +102,7 @@ class Loess {
 
   predict (data: object) {
     // arguments
-    data /*optional*/ = {        
+    data /*optional*/ = {
       x: [number],
       x2: [number]
     } // default this.x
@@ -127,7 +134,7 @@ class Loess {
 - For multivariate data, **normalize** option defaults to true. This means normalization is applied before performing proximity calculation. Data is transformed by dividing the factors by their 10% trimmed sample standard deviation. Turn off this option if dealing with geographical data.
 - Set **robust** option to true to turn on iterative robust fitting procedure. Applicable for estimates that have non-Gaussian errors. More **iterations** requires longer computation time.
 - When using **.grid( )**, cuts refers to the number of equally spaced points required along each axis.
-
+- `dist` is intentionally checked in to avoid the need to build when installing directly from GitHub.
 
 ## Credits
 
