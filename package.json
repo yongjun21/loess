@@ -6,7 +6,6 @@
   "scripts": {
     "build": "rm -rf dist && mkdir dist && babel src --out-dir dist",
     "prepublish": "npm run build && npm run test",
-    "postinstall": "npm run build",
     "test": "standard && mocha --compilers js:babel-core/register"
   },
   "repository": {
