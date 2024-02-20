@@ -8,7 +8,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _mathjs = require('mathjs');
 
-var _mathjs2 = _interopRequireDefault(_mathjs);
+var math = _interopRequireWildcard(_mathjs);
 
 var _lodash = require('lodash.sortby');
 
@@ -23,6 +23,8 @@ var _inputsValidation = require('./inputsValidation');
 var _helpers = require('./helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -73,26 +75,26 @@ var Loess = function () {
         fitted = [];
         residuals = [];
         betas = [];
-        weights = _mathjs2.default.dotMultiply(wt, weightM);
+        weights = math.dotMultiply(wt, weightM);
         (0, _helpers.transpose)(expandedX).forEach(function (point, idx) {
           var fit = (0, _helpers.weightedLeastSquare)(_this3.expandedX, _this3.y, weights[idx]);
           if (fit.error) {
-            var sumWeights = _mathjs2.default.sum(weights[idx]);
-            var mle = sumWeights === 0 ? 0 : _mathjs2.default.multiply(_this3.y, weights[idx]) / sumWeights;
-            fit.beta = _mathjs2.default.zeros(_this3.expandedX.length).set([0], mle);
-            fit.residual = _mathjs2.default.subtract(_this3.y, mle);
+            var sumWeights = math.sum(weights[idx]);
+            var mle = sumWeights === 0 ? 0 : math.multiply(_this3.y, weights[idx]) / sumWeights;
+            fit.beta = math.zeros(_this3.expandedX.length).set([0], mle);
+            fit.residual = math.subtract(_this3.y, mle);
           }
-          fitted.push(_mathjs2.default.squeeze(_mathjs2.default.multiply(point, fit.beta)));
+          fitted.push(math.squeeze(math.multiply(point, fit.beta)));
           residuals.push(fit.residual);
           betas.push(fit.beta.toArray());
-          var median = _mathjs2.default.median(_mathjs2.default.abs(fit.residual));
+          var median = math.median(math.abs(fit.residual));
           wt[idx] = fit.residual.map(function (r) {
             return (0, _helpers.weightFunc)(r, 6 * median, 2);
           });
         });
       }
 
-      var robustWeights = Array(n).fill(_mathjs2.default.ones(this.n));
+      var robustWeights = Array(n).fill(math.ones(this.n));
       for (var iter = 0; iter < this.options.iterations; iter++) {
         iterate.bind(this)(robustWeights);
       }var output = { fitted: fitted, betas: betas, weights: weights };
@@ -100,9 +102,9 @@ var Loess = function () {
       if (this.options.band) {
         var z = (0, _gaussian2.default)(0, 1).ppf(1 - (1 - this.options.band) / 2);
         var halfwidth = weights.map(function (weight, idx) {
-          var V1 = _mathjs2.default.sum(weight);
-          var V2 = _mathjs2.default.multiply(weight, weight);
-          var intervalEstimate = Math.sqrt(_mathjs2.default.multiply(_mathjs2.default.square(residuals[idx]), weight) / (V1 - V2 / V1));
+          var V1 = math.sum(weight);
+          var V2 = math.multiply(weight, weight);
+          var intervalEstimate = Math.sqrt(math.multiply(math.square(residuals[idx]), weight) / (V1 - V2 / V1));
           return intervalEstimate * z;
         });
         Object.assign(output, { halfwidth: halfwidth });
