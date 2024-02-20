@@ -1,4 +1,4 @@
-import math from 'mathjs'
+import * as math from 'mathjs'
 import sort from 'lodash.sortby'
 import gaussian from 'gaussian'
 import {validateModel, validatePredict, validateGrid} from './inputsValidation'
