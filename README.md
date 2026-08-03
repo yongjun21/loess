@@ -65,7 +65,7 @@ fit = model.predict(newData);
 
 #### Find out more by visiting my demo app: <br>
 
-[https://loess.netlify.com/](https://loess.netlify.com/)
+[https://loess.netlify.app/](https://loess.netlify.app/)
 
 ---
 
